@@ -16,10 +16,9 @@ import org.slf4j.LoggerFactory;
 
 import cn.soyadokio.jrbbws.constant.Constants;
 import cn.soyadokio.jrbbws.domain.vo.HttpResult;
-import cn.soyadokio.jrbbws.service.impl.VideoServiceImpl;
 
 /**
- * blah_blah
+ * 爬虫层，与DAO层并列，均服务于服务层
  * @author SoyaDokio
  * @date   2020-05-05
  */
@@ -30,7 +29,7 @@ public class WebCrawler {
 	public HttpResult doGet(String encodedUrl) {
 		CloseableHttpClient httpClient = HttpClients.createDefault();
 		logger.debug("HttpClient初始化成功");
-		
+
 		CloseableHttpResponse response = null;
 		HttpGet request = new HttpGet(encodedUrl);
 		int statusCode = -1;
