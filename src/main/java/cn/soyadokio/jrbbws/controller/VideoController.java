@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import cn.soyadokio.jrbbws.domain.VideoDTO;
+import cn.soyadokio.jrbbws.domain.dto.VideoDto;
 import cn.soyadokio.jrbbws.service.VideoService;
 
 /**
@@ -36,15 +36,15 @@ public class VideoController {
 
 	private static final Logger logger = LoggerFactory.getLogger(VideoController.class);
 
-	static Map<String, VideoDTO> videos = Collections.synchronizedMap(new HashMap<String, VideoDTO>());
+	static Map<String, VideoDto> videos = Collections.synchronizedMap(new HashMap<String, VideoDto>());
 
 	/**
 	 * 查询视频列表
 	 * @return
 	 */
 	@RequestMapping(value = "/", method = RequestMethod.GET)
-	public List<VideoDTO> getVideoList() {
-		List<VideoDTO> vs = new ArrayList<VideoDTO>(videos.values());
+	public List<VideoDto> getVideoList() {
+		List<VideoDto> vs = new ArrayList<VideoDto>(videos.values());
 		return vs;
 	}
 
@@ -54,7 +54,7 @@ public class VideoController {
 	 * @return
 	 */
 	@RequestMapping(value = "/", method = RequestMethod.POST)
-	public String postVideo(@ModelAttribute VideoDTO video) {
+	public String postVideo(@ModelAttribute VideoDto video) {
 		videos.put(video.getDatestamp(), video);
 		return "{\"status\":1,\"errMsg\":\"create success\"}";
 	}
@@ -65,8 +65,8 @@ public class VideoController {
 	 * @return
 	 */
 	@RequestMapping(value = "/{datestamp}", method = RequestMethod.GET)
-	public VideoDTO getVideo(@PathVariable String datestamp) {
-		VideoDTO videoDTO = videoService.getVideo(datestamp);
+	public VideoDto getVideo(@PathVariable String datestamp) {
+		VideoDto videoDTO = videoService.getVideo(datestamp);
 //		GsonBuilder gsonBuilder = new GsonBuilder();
 //		gsonBuilder.serializeNulls();
 //		Gson gson = gsonBuilder.create();
@@ -82,8 +82,8 @@ public class VideoController {
 	 * @return
 	 */
 	@RequestMapping(value = "/{datestamp}", method = RequestMethod.PUT)
-	public String putVideo(@PathVariable String datestamp, @ModelAttribute VideoDTO video) {
-		VideoDTO v = videos.get(datestamp);
+	public String putVideo(@PathVariable String datestamp, @ModelAttribute VideoDto video) {
+		VideoDto v = videos.get(datestamp);
 		v.setTitle(video.getTitle());
 		v.setPoster(video.getPoster());
 		v.setUrl(video.getUrl());

@@ -1,11 +1,11 @@
-package cn.soyadokio.jrbbws.domain;
+package cn.soyadokio.jrbbws.domain.bo;
 
 /**
  * 业务对象URL
  * @author SoyaDokio
  * @date	2020-03-28
  */
-public class UrlBO {
+public class UrlBo {
 
 	/**
 	 * 标清视频链接

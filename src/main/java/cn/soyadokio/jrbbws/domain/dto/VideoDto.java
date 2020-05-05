@@ -1,11 +1,11 @@
-package cn.soyadokio.jrbbws.domain;
+package cn.soyadokio.jrbbws.domain.dto;
 
 /**
  * 数据传输对象Video
  * @author SoyaDokio
  * @date	2020-03-28
  */
-public class VideoDTO {
+public class VideoDto {
 
 	/**
 	 * 状态码，0表失败；1表成功
@@ -37,7 +37,7 @@ public class VideoDTO {
 	 */
 	private String url;
 
-	public VideoDTO() {
+	public VideoDto() {
 		this.status = 0;
 	}
 
@@ -46,7 +46,7 @@ public class VideoDTO {
 	 * @param status		状态码，0表失败；1表成功
 	 * @param errMsg		状态描述
 	 */
-	public VideoDTO(Integer status, String errMsg) {
+	public VideoDto(Integer status, String errMsg) {
 		this.status = status;
 		this.errMsg = errMsg;
 	}
@@ -60,7 +60,7 @@ public class VideoDTO {
 	 * @param poster		视频封面图链接
 	 * @param url			视频链接
 	 */
-	public VideoDTO(Integer status, String errMsg, String datestamp, String title, String poster, String url) {
+	public VideoDto(Integer status, String errMsg, String datestamp, String title, String poster, String url) {
 		this.status = status;
 		this.errMsg = errMsg;
 		this.datestamp = datestamp;

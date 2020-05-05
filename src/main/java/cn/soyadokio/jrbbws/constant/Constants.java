@@ -7,11 +7,6 @@ package cn.soyadokio.jrbbws.constant;
  */
 public class Constants {
 
-//	/**
-//	 * 最新视频的文字标识
-//	 */
-//	public static final String LATEST = "latest";
-
 	/**
 	 * 临界时间点-小时，与临界时间点-分钟组合使用，该时间点以前视频可能尚未更新
 	 */

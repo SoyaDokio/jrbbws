@@ -1,11 +1,11 @@
-package cn.soyadokio.jrbbws.domain;
+package cn.soyadokio.jrbbws.domain.bo;
 
 /**
  * 业务对象Video
  * @author SoyaDokio
  * @date	2020-03-28
  */
-public class VideoBO {
+public class VideoBo {
 
 	/**
 	 * 状态码，应该是表成功，目前所见均为1
@@ -45,7 +45,7 @@ public class VideoBO {
 	/**
 	 * 视频链接对象，含3个不同清晰度的链接
 	 */
-	private UrlBO file;
+	private UrlBo file;
 
 	public Integer getStatus() {
 		return status;
@@ -103,11 +103,11 @@ public class VideoBO {
 		this.playCount = playCount;
 	}
 
-	public UrlBO getFile() {
+	public UrlBo getFile() {
 		return file;
 	}
 
-	public void setFile(UrlBO file) {
+	public void setFile(UrlBo file) {
 		this.file = file;
 	}
 

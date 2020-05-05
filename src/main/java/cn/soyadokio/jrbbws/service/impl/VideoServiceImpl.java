@@ -30,8 +30,10 @@ import com.google.gson.Gson;
 
 import cn.soyadokio.jrbbws.config.InvalidDelimiterException;
 import cn.soyadokio.jrbbws.constant.Constants;
-import cn.soyadokio.jrbbws.domain.VideoBO;
-import cn.soyadokio.jrbbws.domain.VideoDTO;
+import cn.soyadokio.jrbbws.domain.bo.VideoBo;
+import cn.soyadokio.jrbbws.domain.dto.VideoDto;
+import cn.soyadokio.jrbbws.domain.vo.HttpResult;
+import cn.soyadokio.jrbbws.repository.webcrawler.common.WebCrawler;
 import cn.soyadokio.jrbbws.service.VideoService;
 import cn.soyadokio.jrbbws.utils.StringUtils;
 
@@ -50,34 +52,42 @@ public class VideoServiceImpl implements VideoService {
 	private static final Pattern PATTERN_2 = Pattern.compile("<iframe src=\"(.+)\" .+></iframe>");
 
 	/**
+	 * 获取最近日期视频
+	 * 若当前时间早于21:45则获取昨日视频；若当前时间晚于21:45则获取今日视频
+	 * @return
+	 */
+	@Override
+	public VideoDto getLatestVideo() {
+		String datestamp = null;
+		DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyyMMdd");
+		LocalTime time = LocalTime.now();
+		if (time.isAfter(LocalTime.of(Constants.BOUNDARY_HOUR, Constants.BOUNDARY_MINUTE))) {
+			datestamp = LocalDate.now().format(fmt);
+			logger.info("传入日期字符串参数为: latest，需智能修正。当前时间已过 21:45:00，则修正为: {}", datestamp);
+		} else {
+			datestamp = LocalDate.now().minusDays(1).format(fmt);
+			logger.info("传入日期字符串参数为: latest，需智能修正。当前时间未到 21:45:00，则修正为: {}", datestamp);
+		}
+		
+		return null;
+	}
+
+	/**
 	 * 根据日期获取视频
 	 * @param datestamp	字符串日期，形如：20200101
 	 * @return
 	 */
 	@Override
-	public VideoDTO getVideo(String datestamp) {
+	public VideoDto getVideo(String datestamp) {
 		if (datestamp == null) {
 			logger.error("传入日期字符串参数非法: null");
-			return new VideoDTO(0, "服务器内部错误");
+			return new VideoDto(0, "服务器内部错误");
 		}
 		datestamp = datestamp.trim();
 
-		String LATEST = "latest";
-		if (LATEST.equals(datestamp)) {
-			DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyyMMdd");
-			LocalTime time = LocalTime.now();
-			if (time.isAfter(LocalTime.of(Constants.BOUNDARY_HOUR, Constants.BOUNDARY_MINUTE))) {
-				datestamp = LocalDate.now().format(fmt);
-				logger.info("传入日期字符串参数为: latest，需智能修正。当前时间已过 21:45:00，则修正为: {}", datestamp);
-			} else {
-				datestamp = LocalDate.now().minusDays(1).format(fmt);
-				logger.info("传入日期字符串参数为: latest，需智能修正。当前时间未到 21:45:00，则修正为: {}", datestamp);
-			}
-		}
-
 		if (!StringUtils.isDate(datestamp)) {
 			logger.warn("传入日期字符串参数非法: " + datestamp);
-			return new VideoDTO(0, "传入日期字符串参数非法: " + datestamp);
+			return new VideoDto(0, "传入日期字符串参数非法: " + datestamp);
 		}
 		String formattedDatestamp = null;
 		try {
@@ -85,15 +95,12 @@ public class VideoServiceImpl implements VideoService {
 		} catch (InvalidDelimiterException e) {
 			logger.error("非法分隔符异常，插入日期字符串的分隔符不属于\" \"、\"-\"、\"/\"、\".\"的任一种");
 			e.printStackTrace();
-			return new VideoDTO(0, "服务器内部错误");
+			return new VideoDto(0, "服务器内部错误");
 		}
 		logger.info("日期字符串参数为: {}，则智能变换为: {}", datestamp, formattedDatestamp);
 
-		CloseableHttpClient httpClient = HttpClients.createDefault();
-		logger.debug("HttpClient初始化成功");
-
-		String SEARCH_CONTENT = "今日播报";
 		String SEARCH_URL = "http://xiangyang.cjyun.org/s?wd=";
+		String SEARCH_CONTENT = "今日播报";
 		String encodedUrl = null;
 		try {
 			encodedUrl = SEARCH_URL + URLEncoder.encode(SEARCH_CONTENT, Constants.URL_CODE_CHARSET)
@@ -101,43 +108,19 @@ public class VideoServiceImpl implements VideoService {
 		} catch (UnsupportedEncodingException e) {
 			logger.error("当前JVM实例不支持指定编码: {}", Constants.URL_CODE_CHARSET);
 			e.printStackTrace();
-			return new VideoDTO(0, "服务器内部错误");
+			return new VideoDto(0, "服务器内部错误");
 		}
 
-		CloseableHttpResponse response1 = null;
-		HttpGet request1 = new HttpGet(encodedUrl);
-		int statusCode1 = -1;
-		String html1 = null;
-		try {
-			logger.info("[1/3]开始请求-云上襄阳网站按关键词检索功能: {}", request1.toString());
-			response1 = httpClient.execute(request1);
-			statusCode1 = response1.getStatusLine().getStatusCode();
-			html1 = EntityUtils.toString(response1.getEntity(), Constants.HTTP_ENTITY_CHARSET);
-//			logger.info("请求成功，RESPONSE: {}", html1);
-			logger.info("请求成功，RESPONSE: [内容过长，略]");
-		} catch (ClientProtocolException e) {
-			logger.debug("HttpClient遇到未知客户端协议异常，连接终止");
-			e.printStackTrace();
-		} catch (ParseException e) {
-			logger.debug("HTTP的header子元素无法解析");
-			e.printStackTrace();
-		} catch (UnsupportedCharsetException e) {
-			logger.debug("当前JVM实例不支持指定编码: {}", Constants.HTTP_ENTITY_CHARSET);
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			logger.debug("返回实体为: null，或长度超出最大范围: {}", Integer.MAX_VALUE);
-			e.printStackTrace();
-		} catch (IOException e) {
-			logger.debug("HttpClient遇到HTTP协议错误 或 读取输入流时发生未知错误");
-			e.printStackTrace();
-		} finally {
-			HttpClientUtils.closeQuietly(response1);
-			logger.debug("HttpResponse实例已成功关闭");
-		}
-
+		WebCrawler wc = new WebCrawler();
+		logger.info("[1/3]请求开始-云上襄阳网站按关键词检索功能检索《今日播报》节目，请求地址: {}", encodedUrl);
+		HttpResult result1 = wc.doGet(encodedUrl);
+		String html1 = result1.getBody();
+		logger.info("[1/3]请求结束，RESPONSE: [内容过长，略]");
+		
+		int statusCode1 = result1.getCode();
 		if (statusCode1 != HttpStatus.SC_OK) {
 			logger.error("HTTP状态码异常: {}", statusCode1);
-			return new VideoDTO(0, "HTTP状态码异常: " + statusCode1);
+			return new VideoDto(0, "HTTP状态码异常: " + statusCode1);
 		}
 		logger.debug("HTTP状态码: 200");
 
@@ -145,7 +128,7 @@ public class VideoServiceImpl implements VideoService {
 		int index = html1.indexOf(INDEXOF_CONTENT);
 		if (index == -1) {
 			logger.error("RESPONSE中未检索到目标内容: {}", INDEXOF_CONTENT);
-			return new VideoDTO(0, "未检索到指定日期视频");
+			return new VideoDto(0, "未检索到指定日期视频");
 		}
 		logger.info("RESPONSE中成功检索到目标内容: {}", INDEXOF_CONTENT);
 		logger.debug("目标内容索引值: {}", index);
@@ -153,60 +136,37 @@ public class VideoServiceImpl implements VideoService {
 		Matcher m1 = PATTERN_1.matcher(html1);
 		if (!m1.find()) {
 			logger.error("RESPONSE中未检索到当日视频所在网页的链接");
-			return new VideoDTO(0, "RESPONSE中未检索到当日视频所在网页的链接");
+			return new VideoDto(0, "RESPONSE中未检索到当日视频所在网页的链接");
 		}
 		String prefixUrl = m1.group(1);
 		logger.info("RESPONSE中成功检索到当日视频所在网页URL: {}", prefixUrl);
 
-		CloseableHttpResponse response2 = null;
 		String H5_URL = "https://m-xiangyang.cjyun.org";
-		HttpGet request2 = new HttpGet(H5_URL + prefixUrl);
-		int statusCode2 = -1;
-		String html2 = null;
-		try {
-			logger.info("[2/3]开始请求-指定日期（{}）视频所在网页: {}", formattedDatestamp, request2.toString());
-			response2 = httpClient.execute(request2);
-			statusCode2 = response2.getStatusLine().getStatusCode();
-			html2 = EntityUtils.toString(response2.getEntity(), Constants.HTTP_ENTITY_CHARSET);
-//			logger.info("请求成功，RESPONSE: {}", html2);
-			logger.info("请求成功，RESPONSE: [内容过长，略]");
-		} catch (ClientProtocolException e) {
-			logger.debug("HttpClient遇到未知客户端协议异常，连接终止");
-			e.printStackTrace();
-		} catch (ParseException e) {
-			logger.debug("HTTP的header子元素无法解析");
-			e.printStackTrace();
-		} catch (UnsupportedCharsetException e) {
-			logger.debug("当前JVM实例不支持指定编码: {}", Constants.HTTP_ENTITY_CHARSET);
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			logger.debug("返回实体为: null，或长度超出最大范围: {}", Integer.MAX_VALUE);
-			e.printStackTrace();
-		} catch (IOException e) {
-			logger.debug("HttpClient遇到HTTP协议错误 或 读取输入流时发生未知错误");
-			e.printStackTrace();
-		} finally {
-			HttpClientUtils.closeQuietly(response2);
-			logger.debug("HttpResponse实例已成功关闭");
-		}
+		String requestUrl3 = H5_URL + prefixUrl;
+		
+		logger.info("[2/3]请求开始-指定日期（{}）视频所在网页，请求地址: {}", formattedDatestamp, requestUrl3);
+		HttpResult result2 = wc.doGet(requestUrl3);
+		String html2 = result2.getBody();
+		logger.info("[2/3]请求结束，RESPONSE: [内容过长，略]");
 
+		int statusCode2 = result2.getCode();
 		if (statusCode2 != HttpStatus.SC_OK) {
 			logger.error("HTTP状态码异常: {}", statusCode2);
-			return new VideoDTO(0, "HTTP状态码异常: " + statusCode2);
+			return new VideoDto(0, "HTTP状态码异常: " + statusCode2);
 		}
 		logger.debug("HTTP状态码: 200");
 
 		Matcher m2 = PATTERN_2.matcher(html2);
 		if (!m2.find()) {
 			logger.error("RESPONSE中未检索到iframe元素");
-			return new VideoDTO(0, "RESPONSE中未检索到iframe元素");
+			return new VideoDto(0, "RESPONSE中未检索到iframe元素");
 		}
 		String src = m2.group(1);
 		logger.info("RESPONSE中成功检索到iframe元素，iframe.src={}", src);
 
 		if (src.indexOf("?") == -1) {
 			logger.error("iframe节点src属性中检索参数失败");
-			return new VideoDTO(0, "iframe节点src属性中检索参数失败");
+			return new VideoDto(0, "iframe节点src属性中检索参数失败");
 		}
 		String paramsStr = src.substring(src.indexOf("?") + 1);
 		logger.info("iframe节点src属性值中链接的参数部分: {}", paramsStr);
@@ -216,7 +176,7 @@ public class VideoServiceImpl implements VideoService {
 		} catch (UnsupportedEncodingException e) {
 			logger.error("当前JVM实例不支持指定编码: {}", Constants.URL_CODE_CHARSET);
 			e.printStackTrace();
-			return new VideoDTO(0, "服务器内部错误");
+			return new VideoDto(0, "服务器内部错误");
 		}
 		String[] params = paramsStr.split("&");
 		Map<String, String> paramsMap = new HashMap<String, String>(16);
@@ -229,53 +189,28 @@ public class VideoServiceImpl implements VideoService {
 		Gson gson = new Gson();
 		logger.info("iframe节点src属性值中链接的参数部分解析结果: {}", gson.toJson(paramsMap));
 
-		CloseableHttpResponse response3 = null;
 		String GETJSON_URL = "https://app.cjyun.org/video/player/video?sid=";
 		String GETJSON_PARAM_2 = "&vid=";
 		String GETJSON_PARAM_3 = "&type=video";
-		HttpGet request3 = new HttpGet(
-				GETJSON_URL + paramsMap.get("sid") + GETJSON_PARAM_2 + paramsMap.get("vid") + GETJSON_PARAM_3);
-		int statusCode3 = -1;
-		String jsonstring = null;
-		try {
-			logger.info("[3/3]开始请求-视频信息API: {}", request3.toString());
-			response3 = httpClient.execute(request3);
-			statusCode3 = response3.getStatusLine().getStatusCode();
-			jsonstring = EntityUtils.toString(response3.getEntity(), Constants.HTTP_ENTITY_CHARSET);
-			logger.info("请求成功，RESPONSE: {}", jsonstring);
-		} catch (ClientProtocolException e) {
-			logger.debug("HttpClient遇到未知客户端协议异常，连接终止");
-			e.printStackTrace();
-		} catch (ParseException e) {
-			logger.debug("HTTP的header子元素无法解析");
-			e.printStackTrace();
-		} catch (UnsupportedCharsetException e) {
-			logger.debug("当前JVM实例不支持指定编码: {}", Constants.HTTP_ENTITY_CHARSET);
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			logger.debug("返回实体为: null，或长度超出最大范围: {}", Integer.MAX_VALUE);
-			e.printStackTrace();
-		} catch (IOException e) {
-			logger.debug("HttpClient遇到HTTP协议错误 或 读取输入流时发生未知错误");
-			e.printStackTrace();
-		} finally {
-			HttpClientUtils.closeQuietly(response3);
-			logger.debug("HttpResponse实例已成功关闭");
-			HttpClientUtils.closeQuietly(httpClient);
-			logger.debug("HttpClient实例已成功关闭");
-		}
+		String requestUrl = GETJSON_URL + paramsMap.get("sid") + GETJSON_PARAM_2 + paramsMap.get("vid") + GETJSON_PARAM_3;
+		
+		logger.info("[3/3]请求开始-视频信息API，请求地址: {}", requestUrl);
+		HttpResult result3 = wc.doGet(requestUrl);
+		String jsonstring = result3.getBody();
+		logger.info("[3/3]请求结束，RESPONSE: {}", jsonstring);
 
+		int statusCode3 = result3.getCode();
 		if (statusCode3 != HttpStatus.SC_OK) {
 			logger.error("HTTP状态码异常: {}", statusCode3);
-			return new VideoDTO(0, "HTTP状态码异常: " + statusCode3);
+			return new VideoDto(0, "HTTP状态码异常: " + statusCode3);
 		}
 		logger.debug("HTTP状态码: 200");
 
 		jsonstring = jsonstring.replace("\\/", "/");
 		jsonstring = StringUtils.unicodeToCn(jsonstring);
 		logger.info("JSON解析结果: {}", jsonstring);
-		VideoBO videoBO = gson.fromJson(jsonstring, VideoBO.class);
-		VideoDTO videoDTO = new VideoDTO(1, "success", datestamp, videoBO.getTitle().replace(".mp4", ""),
+		VideoBo videoBO = gson.fromJson(jsonstring, VideoBo.class);
+		VideoDto videoDTO = new VideoDto(1, "success", datestamp, videoBO.getTitle().replace(".mp4", ""),
 				paramsMap.get("thumb"), videoBO.getFile().getHd());
 		return videoDTO;
 	}
