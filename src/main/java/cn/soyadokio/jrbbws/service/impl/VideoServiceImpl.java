@@ -1,10 +1,8 @@
 package cn.soyadokio.jrbbws.service.impl;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.nio.charset.UnsupportedCharsetException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -14,14 +12,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.http.HttpStatus;
-import org.apache.http.ParseException;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.utils.HttpClientUtils;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -68,8 +58,7 @@ public class VideoServiceImpl implements VideoService {
 			datestamp = LocalDate.now().minusDays(1).format(fmt);
 			logger.info("传入日期字符串参数为: latest，需智能修正。当前时间未到 21:45:00，则修正为: {}", datestamp);
 		}
-		
-		return null;
+		return getVideo(datestamp);
 	}
 
 	/**
@@ -116,7 +105,7 @@ public class VideoServiceImpl implements VideoService {
 		HttpResult result1 = wc.doGet(encodedUrl);
 		String html1 = result1.getBody();
 		logger.info("[1/3]请求结束，RESPONSE: [内容过长，略]");
-		
+
 		int statusCode1 = result1.getCode();
 		if (statusCode1 != HttpStatus.SC_OK) {
 			logger.error("HTTP状态码异常: {}", statusCode1);
@@ -143,7 +132,7 @@ public class VideoServiceImpl implements VideoService {
 
 		String H5_URL = "https://m-xiangyang.cjyun.org";
 		String requestUrl3 = H5_URL + prefixUrl;
-		
+
 		logger.info("[2/3]请求开始-指定日期（{}）视频所在网页，请求地址: {}", formattedDatestamp, requestUrl3);
 		HttpResult result2 = wc.doGet(requestUrl3);
 		String html2 = result2.getBody();
@@ -192,8 +181,9 @@ public class VideoServiceImpl implements VideoService {
 		String GETJSON_URL = "https://app.cjyun.org/video/player/video?sid=";
 		String GETJSON_PARAM_2 = "&vid=";
 		String GETJSON_PARAM_3 = "&type=video";
-		String requestUrl = GETJSON_URL + paramsMap.get("sid") + GETJSON_PARAM_2 + paramsMap.get("vid") + GETJSON_PARAM_3;
-		
+		String requestUrl = GETJSON_URL + paramsMap.get("sid") + GETJSON_PARAM_2 + paramsMap.get("vid")
+				+ GETJSON_PARAM_3;
+
 		logger.info("[3/3]请求开始-视频信息API，请求地址: {}", requestUrl);
 		HttpResult result3 = wc.doGet(requestUrl);
 		String jsonstring = result3.getBody();
