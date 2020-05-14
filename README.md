@@ -17,3 +17,13 @@
 3. `/jrbb/latest` 尝试获取最新《今日播报》视频的信息
 
 ![image](https://user-images.githubusercontent.com/16408325/80950334-38bd7d80-8e28-11ea-8e49-5c5c4f9fbe25.png)
+<br><br><br><br>
+
+启动方法：
+
+---
+
+1. 命令行下切到项目根目录；
+2. mvn clean package，不想测试也可加上参数，即mvn clean package -Dmaven.test.skip=true
+3. 在项目根目录下target文件夹下拷出jar包至服务器上项目运行目录（如/usr/local/jrbbws/）；
+4. nohup jrbbws-x.x.x.jar &
