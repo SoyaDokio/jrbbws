@@ -1,6 +1,7 @@
-# jrbbws
-获取襄阳《今日播报》节目资源的WebService
-<br><br><br><br>
+# 《今日播报》WebService
+
+用以获取襄阳《今日播报》视频节目资源信息
+<br><br><br>
 
 ### 程序运行结果结果预览
 
@@ -24,8 +25,6 @@
 2. `/jrbb/{yyyyMMdd}` 尝试获取指定日期《今日播报》视频的信息
 
 ![image](https://user-images.githubusercontent.com/16408325/80950260-188dbe80-8e28-11ea-878d-da35d6fd909e.png)
-
-<br><br><br><br>
 
 ### 启动方法：
 
