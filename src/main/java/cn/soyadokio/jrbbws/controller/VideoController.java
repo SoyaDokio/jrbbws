@@ -32,14 +32,17 @@ public class VideoController {
 	private Gson gson = new GsonBuilder().serializeNulls().create();
 
 	/**
-	 * 查询视频列表
+	 * 查询最近的一个视频
 	 * @return
 	 */
 	@RequestMapping(value = "/latest", method = RequestMethod.GET)
-	public VideoDto getVideoList() {
-		VideoDto videoDTO = videoService.getLatestVideo();
-		logger.info("回传最终结果: {}", gson.toJson(videoDTO) + System.lineSeparator() + System.lineSeparator());
-		return videoDTO;
+	public VideoDto getLatestVideo() {
+		logger.info("↓ 开始查询 ↓");
+		logger.info("指定日期[latest]视频信息");
+		VideoDto videoDto = videoService.getLatestVideo();
+		logger.info("指定日期[latest]视频信息: {}", gson.toJson(videoDto));
+		logger.info("↑ 查询结果 ↑ {}", System.lineSeparator());
+		return videoDto;
 	}
 
 	/**
@@ -49,9 +52,12 @@ public class VideoController {
 	 */
 	@RequestMapping(value = "/{datestamp}", method = RequestMethod.GET)
 	public VideoDto getVideo(@PathVariable String datestamp) {
-		VideoDto videoDTO = videoService.getVideo(datestamp);
-		logger.info("回传最终结果: {}", gson.toJson(videoDTO) + System.lineSeparator() + System.lineSeparator());
-		return videoDTO;
+		logger.info("↓ 开始查询 ↓");
+		logger.info("指定日期[" + datestamp + "]视频信息");
+		VideoDto videoDto = videoService.getVideo(datestamp);
+		logger.info("指定日期[" + datestamp + "]视频信息: {}", gson.toJson(videoDto));
+		logger.info("↑ 查询结果 ↑ {}", System.lineSeparator());
+		return videoDto;
 	}
 
 }

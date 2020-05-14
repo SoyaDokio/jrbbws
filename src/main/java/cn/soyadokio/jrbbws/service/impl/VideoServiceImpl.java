@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.annotation.Resource;
+
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +24,9 @@ import cn.soyadokio.jrbbws.config.InvalidDelimiterException;
 import cn.soyadokio.jrbbws.constant.Constants;
 import cn.soyadokio.jrbbws.domain.bo.VideoBo;
 import cn.soyadokio.jrbbws.domain.dto.VideoDto;
+import cn.soyadokio.jrbbws.domain.po.VideoPo;
 import cn.soyadokio.jrbbws.domain.vo.HttpResult;
+import cn.soyadokio.jrbbws.repository.dao.VideoDao;
 import cn.soyadokio.jrbbws.repository.webcrawler.common.WebCrawler;
 import cn.soyadokio.jrbbws.service.VideoService;
 import cn.soyadokio.jrbbws.utils.StringUtils;
@@ -34,6 +38,9 @@ import cn.soyadokio.jrbbws.utils.StringUtils;
  */
 @Service("videoService")
 public class VideoServiceImpl implements VideoService {
+
+	@Resource(name = "videoDao")
+	private VideoDao videoDao;
 
 	private static final Logger logger = LoggerFactory.getLogger(VideoServiceImpl.class);
 
@@ -48,15 +55,15 @@ public class VideoServiceImpl implements VideoService {
 	 */
 	@Override
 	public VideoDto getLatestVideo() {
-		String datestamp = null;
 		DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyyMMdd");
 		LocalTime time = LocalTime.now();
+		String datestamp = null;
 		if (time.isAfter(LocalTime.of(Constants.BOUNDARY_HOUR, Constants.BOUNDARY_MINUTE))) {
 			datestamp = LocalDate.now().format(fmt);
-			logger.info("传入日期字符串参数为: latest，需智能修正。当前时间已过 21:45:00，则修正为: {}", datestamp);
+			logger.info("传入日期字符串参数为: latest，需智能判断。当前时刻已过 21:45:00，则转换为: {}", datestamp);
 		} else {
 			datestamp = LocalDate.now().minusDays(1).format(fmt);
-			logger.info("传入日期字符串参数为: latest，需智能修正。当前时间未到 21:45:00，则修正为: {}", datestamp);
+			logger.info("传入日期字符串参数为: latest，需智能判断。当前时刻未到 21:45:00，则转换为: {}", datestamp);
 		}
 		return getVideo(datestamp);
 	}
@@ -78,6 +85,16 @@ public class VideoServiceImpl implements VideoService {
 			logger.warn("传入日期字符串参数非法: " + datestamp);
 			return new VideoDto(0, "传入日期字符串参数非法: " + datestamp);
 		}
+
+		// 先在DB查询，若有直接返回，若无则使用爬虫爬取
+		logger.info("先尝试在DB中查询是否存在缓存...");
+		VideoPo videoPo = videoDao.queryVideo(datestamp);
+		if (videoPo.getStatus() != -1) {
+			logger.info("DB缓存存在，直接返回查询结果");
+			return videoPo.toVideoDto();
+		}
+		logger.info("DB缓存不存在，尝试通过网站解析方式获取");
+
 		String formattedDatestamp = null;
 		try {
 			formattedDatestamp = StringUtils.delimitDatestring(datestamp, "-");
@@ -86,10 +103,10 @@ public class VideoServiceImpl implements VideoService {
 			e.printStackTrace();
 			return new VideoDto(0, "服务器内部错误");
 		}
-		logger.info("日期字符串参数为: {}，则智能变换为: {}", datestamp, formattedDatestamp);
+		logger.info("日期字符串参数为: {}，增加分隔符后为: {}", datestamp, formattedDatestamp);
 
-		String SEARCH_URL = "http://xiangyang.cjyun.org/s?wd=";
-		String SEARCH_CONTENT = "今日播报";
+		final String SEARCH_URL = "http://xiangyang.cjyun.org/s?wd=";
+		final String SEARCH_CONTENT = "今日播报";
 		String encodedUrl = null;
 		try {
 			encodedUrl = SEARCH_URL + URLEncoder.encode(SEARCH_CONTENT, Constants.URL_CODE_CHARSET)
@@ -113,13 +130,13 @@ public class VideoServiceImpl implements VideoService {
 		}
 		logger.debug("HTTP状态码: 200");
 
-		String INDEXOF_CONTENT = "搜索结果&nbsp;共&nbsp;1&nbsp;个";
+		final String INDEXOF_CONTENT = "搜索结果&nbsp;共&nbsp;1&nbsp;个";
 		int index = html1.indexOf(INDEXOF_CONTENT);
 		if (index == -1) {
-			logger.error("RESPONSE中未检索到目标内容: {}", INDEXOF_CONTENT);
+			logger.error("RESPONSE中未检索到指定内容: {}", INDEXOF_CONTENT);
 			return new VideoDto(0, "未检索到指定日期视频");
 		}
-		logger.info("RESPONSE中成功检索到目标内容: {}", INDEXOF_CONTENT);
+		logger.info("RESPONSE中成功检索到指定内容: {}", INDEXOF_CONTENT);
 		logger.debug("目标内容索引值: {}", index);
 
 		Matcher m1 = PATTERN_1.matcher(html1);
@@ -130,7 +147,7 @@ public class VideoServiceImpl implements VideoService {
 		String prefixUrl = m1.group(1);
 		logger.info("RESPONSE中成功检索到当日视频所在网页URL: {}", prefixUrl);
 
-		String H5_URL = "https://m-xiangyang.cjyun.org";
+		final String H5_URL = "https://m-xiangyang.cjyun.org";
 		String requestUrl3 = H5_URL + prefixUrl;
 
 		logger.info("[2/3]请求开始-指定日期（{}）视频所在网页，请求地址: {}", formattedDatestamp, requestUrl3);
@@ -151,14 +168,14 @@ public class VideoServiceImpl implements VideoService {
 			return new VideoDto(0, "RESPONSE中未检索到iframe元素");
 		}
 		String src = m2.group(1);
-		logger.info("RESPONSE中成功检索到iframe元素，iframe.src={}", src);
+		logger.info("RESPONSE中成功检索到iframe元素，iframe元素src属性：{}", src);
 
 		if (src.indexOf("?") == -1) {
-			logger.error("iframe节点src属性中检索参数失败");
-			return new VideoDto(0, "iframe节点src属性中检索参数失败");
+			logger.error("iframe元素src属性中检索参数失败");
+			return new VideoDto(0, "iframe元素src属性中检索参数失败");
 		}
 		String paramsStr = src.substring(src.indexOf("?") + 1);
-		logger.info("iframe节点src属性值中链接的参数部分: {}", paramsStr);
+		logger.info("iframe元素src属性值中链接的参数部分: {}", paramsStr);
 
 		try {
 			paramsStr = URLDecoder.decode(paramsStr, Constants.URL_CODE_CHARSET);
@@ -176,11 +193,11 @@ public class VideoServiceImpl implements VideoService {
 			paramsMap.put(key, val);
 		}
 		Gson gson = new Gson();
-		logger.info("iframe节点src属性值中链接的参数部分解析结果: {}", gson.toJson(paramsMap));
+		logger.info("iframe元素src属性值中链接的参数部分解析结果: {}", gson.toJson(paramsMap));
 
-		String GETJSON_URL = "https://app.cjyun.org/video/player/video?sid=";
-		String GETJSON_PARAM_2 = "&vid=";
-		String GETJSON_PARAM_3 = "&type=video";
+		final String GETJSON_URL = "https://app.cjyun.org/video/player/video?sid=";
+		final String GETJSON_PARAM_2 = "&vid=";
+		final String GETJSON_PARAM_3 = "&type=video";
 		String requestUrl = GETJSON_URL + paramsMap.get("sid") + GETJSON_PARAM_2 + paramsMap.get("vid")
 				+ GETJSON_PARAM_3;
 
@@ -198,19 +215,20 @@ public class VideoServiceImpl implements VideoService {
 
 		jsonstring = jsonstring.replace("\\/", "/");
 		jsonstring = StringUtils.unicodeToCn(jsonstring);
-		logger.info("JSON解析结果: {}", jsonstring);
-		VideoBo videoBO = gson.fromJson(jsonstring, VideoBo.class);
-		VideoDto videoDTO = new VideoDto(1, "success", datestamp, videoBO.getTitle().replace(".mp4", ""),
-				paramsMap.get("thumb"), videoBO.getFile().getHd());
-		return videoDTO;
-	}
+		logger.info("视频信息API返回值解析结果: {}", jsonstring);
+		VideoBo videoBo = gson.fromJson(jsonstring, VideoBo.class);
+		VideoDto videoDto = new VideoDto(1, "success", datestamp, videoBo.getTitle().replace(".mp4", ""),
+				paramsMap.get("thumb"), videoBo.getFile().getHd());
 
-//	public static void main(String[] args) throws UnsupportedEncodingException {
-//		new VideoServiceImpl();
-//	}
-//
-//	public VideoServiceImpl() {
-//		System.out.println(new Gson().toJson(getVideo("latest")));
-//	}
+		// 使用爬虫爬取后存入DB，最后返回
+		int row = videoDao.addVideo(videoDto.toVideoPo());
+		if (row == 1) {
+			logger.info("将解析结果存入DB -> 成功");
+		} else {
+			logger.info("将解析结果存入DB -> 失败");
+		}
+
+		return videoDto;
+	}
 
 }

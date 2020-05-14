@@ -1,13 +1,13 @@
-package cn.soyadokio.jrbbws.domain.dto;
+package cn.soyadokio.jrbbws.domain.po;
 
-import cn.soyadokio.jrbbws.domain.po.VideoPo;
+import cn.soyadokio.jrbbws.domain.dto.VideoDto;
 
 /**
- * 数据传输对象Video
+ * 持久化对象Video
  * @author SoyaDokio
- * @date	2020-03-28
+ * @date   2020-05-05
  */
-public class VideoDto {
+public class VideoPo {
 
 	/**
 	 * 状态码，0表失败；1表成功
@@ -39,22 +39,23 @@ public class VideoDto {
 	 */
 	private String url;
 
-	public VideoDto() {
-		this.status = 0;
+	public VideoPo() {
+		// 默认失败
+		this.status = -1;
 	}
 
 	/**
-	 * 实例化Video数据传输对象，用于传递异常状态和异常描述
+	 * 实例化Video持久化对象，用于传递异常状态和异常描述
 	 * @param status		状态码，0表失败；1表成功
 	 * @param errMsg		状态描述
 	 */
-	public VideoDto(Integer status, String errMsg) {
+	public VideoPo(Integer status, String errMsg) {
 		this.status = status;
 		this.errMsg = errMsg;
 	}
 
 	/**
-	 * 实例化Video数据传输对象
+	 * 实例化Video持久化对象
 	 * @param status		状态码，0表失败；1表成功
 	 * @param errMsg		状态描述
 	 * @param datestamp		字符串日期，形如：20200101
@@ -62,7 +63,7 @@ public class VideoDto {
 	 * @param poster		视频封面图链接
 	 * @param url			视频链接
 	 */
-	public VideoDto(Integer status, String errMsg, String datestamp, String title, String poster, String url) {
+	public VideoPo(Integer status, String errMsg, String datestamp, String title, String poster, String url) {
 		this.status = status;
 		this.errMsg = errMsg;
 		this.datestamp = datestamp;
@@ -121,12 +122,12 @@ public class VideoDto {
 
 	@Override
 	public String toString() {
-		return "VideoDto [status=" + status + ", errMsg=" + errMsg + ", datestamp=" + datestamp + ", title=" + title
+		return "VideoPo [status=" + status + ", errMsg=" + errMsg + ", datestamp=" + datestamp + ", title=" + title
 				+ ", poster=" + poster + ", url=" + url + "]";
 	}
 
-	public VideoPo toVideoPo() {
-		return new VideoPo(status, errMsg, datestamp, title, poster, url);
+	public VideoDto toVideoDto() {
+		return new VideoDto(status, errMsg, datestamp, title, poster, url);
 	}
 
 }

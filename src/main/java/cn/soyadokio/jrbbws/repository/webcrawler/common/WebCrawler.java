@@ -39,7 +39,7 @@ public class WebCrawler {
 			response = httpClient.execute(request);
 			statusCode = response.getStatusLine().getStatusCode();
 			html = EntityUtils.toString(response.getEntity(), Constants.HTTP_ENTITY_CHARSET);
-			logger.debug("请求结束，RESPONSE: {}", html);
+			logger.debug("请求结束，RESPONSE: {}", html.replace("\n", "").replace("\r", ""));
 		} catch (ClientProtocolException e) {
 			logger.debug("HttpClient遇到未知客户端协议异常，连接终止");
 			e.printStackTrace();

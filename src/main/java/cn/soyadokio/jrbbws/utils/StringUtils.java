@@ -58,6 +58,9 @@ public class StringUtils {
 	 * @return
 	 */
 	public static boolean isDate(String datestamp) {
+		if (datestamp == null) {
+			return false;
+		}
 		if (datestamp.length() != 8 || datestamp.indexOf(" ") != -1) {
 			return false;
 		}
