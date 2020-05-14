@@ -33,6 +33,6 @@
 ### 启动方法：
 
 1. 命令行下切到项目根目录；
-2. mvn clean package，不想测试也可加上参数，即mvn clean package -Dmaven.test.skip=true
+2. 执行 `mvn clean package` ，不想测试也可加上参数，即 `mvn clean package -Dmaven.test.skip=true`
 3. 在项目根目录下target文件夹下拷出jar包至服务器上项目运行目录（如/usr/local/jrbbws/）；
-4. nohup jrbbws-x.x.x.jar &
+4. 执行 `nohup jrbbws-x.x.x.jar &` ，即可后台运行该程序且会在本目录下生成名为 `nohup.out` 的日志文件，内容是程序的console输出
