@@ -1,8 +1,10 @@
 @charset "UTF-8";
+
 body {
 	background: #d5dde1;
 	font-family: "Hiragino Sans GB", "Microsoft YaHei",
 		"WenQuanYi Micro Hei", sans-serif;
+	cursor: default;
 }
 
 .container {
@@ -45,8 +47,35 @@ span {
 	padding: 1px 3px;
 	border-radius: 4px;
 	box-shadow: 2px 2px 5px #888;
+	color: #000;
+}
+
+.wrapper {
+	display: inline;
+	font-style: oblique;
+	padding: 0 3px 0 1px;
+	color: #090;
 }
 
 dd {
 	margin-left: 16px;
+}
+
+a:link {
+	text-decoration: none;
+	color: #000;
+}
+
+a:active {
+	text-decoration: blink
+}
+
+a:hover {
+	text-decoration: none;
+	color: red;
+}
+
+a:visited {
+	text-decoration: none;
+	color: #000;
 }
