@@ -39,6 +39,6 @@
 
 ### 关闭方法
 
-![image](https://user-images.githubusercontent.com/16408325/82002025-40361f80-968f-11ea-9eb7-46ed51625ec2.png)
+![image](https://user-images.githubusercontent.com/16408325/82002270-f568d780-968f-11ea-92b2-3505febc9664.png)
 1. 执行 `ps -aux|grep jrbbws` 找到PID，如此处为1274；
 2. 执行 `kill -9 1274` 终止程序
