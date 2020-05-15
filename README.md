@@ -35,7 +35,7 @@
 ### 启动方法
 
 1. 执行 `java -jar jrbbws-x.x.x.jar` ，程序开始运行，开始console输出。执行 `Ctrl-C` 可中断程序；
-2. 执行 `nohup jrbbws-x.x.x.jar &` ，程序开始后台运行，且会在本目录下生成名为 `nohup.out` 的日志文件，内容是程序的console输出
+2. 执行 `nohup java -jar jrbbws-x.x.x.jar &` ，程序开始后台运行，且会在本目录下生成名为 `nohup.out` 的日志文件，内容是程序的console输出
 
 ### 关闭方法
 
