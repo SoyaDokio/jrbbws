@@ -4,8 +4,8 @@
 
 	<contextName>logback-jrbbws</contextName>
 
-	<property name="logging.path" value="C:/logs" />
-<!-- 	<property name="logging.path" value="/data/logs" /> -->
+<!-- 	<property name="logging.path" value="C:/logs" /> -->
+	<property name="logging.path" value="/data/logs" />
 
 	<!-- 输出到控制台 -->
 	<appender name="consoleLog" class="ch.qos.logback.core.ConsoleAppender">
