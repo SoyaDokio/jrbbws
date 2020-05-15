@@ -1,0 +1,52 @@
+@charset "UTF-8";
+body {
+	background: #d5dde1;
+	font-family: "Hiragino Sans GB", "Microsoft YaHei",
+		"WenQuanYi Micro Hei", sans-serif;
+}
+
+.container {
+	width: 400px;
+	display: block;
+	margin: 0 auto;
+	margin: 100px auto;
+}
+
+.caption {
+	font-size: x-large;
+	font-weight: bold;
+}
+
+.detail {
+	font-size: x-small;
+	color: #777;
+	margin-top: 10px;
+	margin-left: 33px;
+}
+
+.usage {
+	font-size: large;
+	font-weight: 600;
+	margin-top: 40px;
+	margin-left: 8px;
+}
+
+dl {
+	padding-left: 30px;
+	font-size: 14px;
+}
+
+dt {
+	margin: 8px 0;
+}
+
+span {
+	background-color: #ffc;
+	padding: 1px 3px;
+	border-radius: 4px;
+	box-shadow: 2px 2px 5px #888;
+}
+
+dd {
+	margin-left: 16px;
+}
