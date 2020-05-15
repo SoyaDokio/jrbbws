@@ -36,3 +36,9 @@
 
 1. 执行 `java -jar jrbbws-x.x.x.jar` ，程序开始运行，开始console输出。执行 `Ctrl-C` 可中断程序；
 2. 执行 `nohup jrbbws-x.x.x.jar &` ，程序开始后台运行，且会在本目录下生成名为 `nohup.out` 的日志文件，内容是程序的console输出
+
+### 关闭方法
+
+![image](https://user-images.githubusercontent.com/16408325/82002025-40361f80-968f-11ea-9eb7-46ed51625ec2.png)
+1. 执行 `ps -aux|grep jrbbws` 找到PID，如此处为1274；
+2. 执行 `kill -9 1274` 终止程序
