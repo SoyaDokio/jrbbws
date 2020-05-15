@@ -3,7 +3,7 @@
 用以获取襄阳《今日播报》视频节目资源信息
 <br><br><br>
 
-### 程序运行结果结果预览
+### 执行结果预览
 
 ```json
 {
@@ -16,7 +16,7 @@
 }
 ```
 
-### 现包含功能：
+### 功能
 
 1. `/jrbb/latest` 尝试获取最新《今日播报》视频的信息
 
@@ -26,9 +26,13 @@
 
 ![image](https://user-images.githubusercontent.com/16408325/80950260-188dbe80-8e28-11ea-878d-da35d6fd909e.png)
 
-### 启动方法：
+### 打包流程
 
-1. 命令行下切到项目根目录；
-2. 执行 `mvn clean package` ，不想测试也可加上参数，即 `mvn clean package -Dmaven.test.skip=true`
-3. 在项目根目录下target文件夹下拷出jar包至服务器上项目运行目录（如/usr/local/jrbbws/）；
-4. 执行 `nohup jrbbws-x.x.x.jar &` ，即可后台运行该程序且会在本目录下生成名为 `nohup.out` 的日志文件，内容是程序的console输出
+1. 命令行下切换到项目根目录；
+2. 执行 `mvn clean package` 打包为jar（可通过参数跳过打包时的测试，即 `mvn clean package -Dmaven.test.skip=true`）；
+3. target文件夹下可得 `jrbbws-x.x.x.jar`
+
+### 启动方法
+
+1. 执行 `java -jar jrbbws-x.x.x.jar` ，程序开始运行，开始console输出。执行 `Ctrl-C` 可中断程序；
+2. 执行 `nohup jrbbws-x.x.x.jar &` ，程序开始后台运行，且会在本目录下生成名为 `nohup.out` 的日志文件，内容是程序的console输出
