@@ -41,4 +41,6 @@
 
 ![image](https://user-images.githubusercontent.com/16408325/82002270-f568d780-968f-11ea-92b2-3505febc9664.png)
 1. 执行 `ps -aux|grep jrbbws` 找到PID，如此处为1274；
-2. 执行 `kill -9 1274` 终止程序
+2. 执行 `kill -2 1274` 终止程序
+
+<font color=#bbbbbb size=2>注：`kill -2`相当于快捷键Ctrl+C，会触发Java的ShutdownHook事件处理；`kill -9`是直接暴力强制杀死进程，不会执行ShutdownHook</font>
