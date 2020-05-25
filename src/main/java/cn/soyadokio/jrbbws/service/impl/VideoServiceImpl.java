@@ -133,11 +133,11 @@ public class VideoServiceImpl implements VideoService {
 		final String INDEXOF_CONTENT = "搜索结果&nbsp;共&nbsp;1&nbsp;个";
 		int index = html1.indexOf(INDEXOF_CONTENT);
 		if (index == -1) {
-			logger.error("RESPONSE中未检索到指定内容: {}", INDEXOF_CONTENT);
+			logger.error("RESPONSE中未检索到当日视频信息");
 			return new VideoDto(0, "未检索到指定日期视频");
 		}
-		logger.info("RESPONSE中成功检索到指定内容: {}", INDEXOF_CONTENT);
-		logger.debug("目标内容索引值: {}", index);
+		logger.info("RESPONSE中成功检索到当日视频信息");
+		logger.debug("目标内容[{}]索引值: {}", INDEXOF_CONTENT, index);
 
 		Matcher m1 = PATTERN_1.matcher(html1);
 		if (!m1.find()) {
