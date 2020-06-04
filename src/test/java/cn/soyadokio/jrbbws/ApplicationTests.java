@@ -43,7 +43,7 @@ public class ApplicationTests {
 		RequestBuilder request = null;
 
 		// get查询datestamp为20200326的视频
-		request = get("/jrbb/20200101");
+		request = get("/jrbbws/20200101");
 		mvc.perform(request).andExpect(content().string(equalTo(
 				"{\"status\":1,\"errMsg\":\"success\",\"datestamp\":\"20200101\",\"title\":\"20200101今日播报 \",\"poster\":\"http://img.cjyun.org/a/10125/202001/d12430cb3aee9d014f16491380385f2f.png\",\"url\":\"http://videoplus.cjyun.org/20200101/605546_605546_1577881046_transv.mp4\"}")));
 

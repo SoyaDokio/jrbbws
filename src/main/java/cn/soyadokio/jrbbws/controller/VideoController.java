@@ -21,7 +21,7 @@ import cn.soyadokio.jrbbws.service.VideoService;
  * @date	2020-03-28
  */
 @RestController
-@RequestMapping("/jrbb")
+@RequestMapping("/jrbbws")
 public class VideoController {
 
 	@Resource(name = "videoService")

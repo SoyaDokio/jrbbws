@@ -1,6 +1,8 @@
 # 《今日播报》WebService
 
 用以获取襄阳《今日播报》视频节目资源信息
+
+注：从v2.2.3开始，不再上传jar包，改由war包替代。若有需要则改pom.xml后mvn clean package即可获取。
 <br><br><br>
 
 ### 执行结果预览
@@ -18,11 +20,11 @@
 
 ### 功能
 
-1. `/jrbb/latest` 尝试获取最新《今日播报》视频的信息
+1. `/jrbbws/latest` 尝试获取最新《今日播报》视频的信息
 
 ![image](https://user-images.githubusercontent.com/16408325/80950334-38bd7d80-8e28-11ea-8e49-5c5c4f9fbe25.png)
 
-2. `/jrbb/{yyyyMMdd}` 尝试获取指定日期《今日播报》视频的信息
+2. `/jrbbws/{yyyyMMdd}` 尝试获取指定日期《今日播报》视频的信息
 
 ![image](https://user-images.githubusercontent.com/16408325/80950260-188dbe80-8e28-11ea-878d-da35d6fd909e.png)
 
